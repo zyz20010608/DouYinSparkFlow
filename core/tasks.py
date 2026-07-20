@@ -81,14 +81,28 @@ def scroll_and_select_user(page, username, targets):
 
     logger.debug(f"账号 {username} 点击进入好友标签页")
     # 点击好友标签页
-    page.wait_for_selector(friends_tab_selector)
+    retry_operation(
+    f"账号 {username} 等待好友标签页加载",
+    page.wait_for_selector,
+    retries=5,  # 重试 5 次
+    delay=3,
+    selector=friends_tab_selector,
+    timeout=config["browserTimeout"]
+    )
     page.locator(friends_tab_selector).click()
 
     logger.debug(f"账号 {username} 进入好友列表页面")
 
     # 确保第一个好友元素加载完成
     first_friend_selector = 'xpath=//*[@id="sub-app"]/div/div/div[2]/div[2]/div/div/div[1]/div/div/div/ul/div/div/div[1]/li/div'
-    page.wait_for_selector(first_friend_selector)
+    retry_operation(
+    f"账号 {username} 等待第一个好友元素加载",
+    page.wait_for_selector,
+    retries=5,
+    delay=3,
+    selector=first_friend_selector,
+    timeout=config["browserTimeout"]
+    )
     page.locator(first_friend_selector).click()  # 点击第一个好友，确保列表激活
 
     logger.debug(f"账号 {username} 已激活好友列表，开始滚动查找目标好友")
@@ -250,8 +264,14 @@ def do_user_task(browser, username, cookies, targets):
             logger.debug(f"账号 {username} 已选中好友 {username} 发送消息")
             # 等待聊天输入框元素加载完成，使用更稳定的属性选择器
             chat_input_selector = "xpath=//div[contains(@class, 'chat-input-')]"
-            page.wait_for_selector(chat_input_selector, timeout=config["browserTimeout"])
-            chat_input = page.locator(chat_input_selector)
+            retry_operation(
+    f"账号 {username} 等待聊天输入框加载",
+    page.wait_for_selector,
+    retries=5,
+    delay=3,
+    selector=chat_input_selector,
+    timeout=config["browserTimeout"]
+)
 
             # 在 chat-input-dccKiL 中输入内容
             message = build_message()
